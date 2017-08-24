@@ -1,27 +1,94 @@
-class NavbarItem extends React.Component {
-	render() {
-		let a = React.createElement('a', {href: this.props.href}, this.props.text);
-		return React.createElement('li', null, a);
+class TodoForm extends React.Component {
+
+	_handleSubmit (event) {
+		event.preventDefault();
+
+		let task = this._task;
+		let description = this._description;
+
+		this.props.addTodo(task.value, description.value);
+	}
+
+	render () {
+		return (
+			<section className="col-xs-12 col-md-6">
+				<form onSubmit={this._handleSubmit.bind(this)}>
+					<div className="form-group">
+						<label htmlFor="task">Task</label>
+						<input id="task" className="form-control" type="text" placeholder="Task" name="task" ref={(input) => this._task = input}/>
+					</div>
+					<div className="form-group">
+						<label htmlFor="description">Description</label>
+						<textarea id="description" className="form-control" name="description" placeholder="Description" ref={(textarea) => this._description = textarea}/>					
+					</div>
+					<button type="submit" className="btn btn-primary">Submit</button>
+				</form>
+			</section>
+		);
 	}
 }
 
-class Navbar extends React.Component {
-	render() {
-		let itemProps = [
-			{key: 1, href: '#', text: 'Hola yo soy un elemento'}, 
-			{key: 2, href: '#', text: 'Hola yo soy otro elemento'}
-		];
-		
-		let ul = React.createElement('ul', null, itemProps.map(function (props) {
-			return React.createElement(NavbarItem, props, null);
-		}));
+class TodosSection extends React.Component {
+	render () {
+		const todos = this.props.getTodos();
 
-		return React.createElement('nav', null, ul);
+		return (
+			<section className="col-xs-12 col-md-6">
+				{todos}
+			</section>
+		);
 	}
 }
 
-function App(props) {
-	return React.createElement(Navbar, null, null);
+class Todo extends React.Component {
+	render () {
+		return (
+			<article className="card text-center">
+				<div className="card-header">
+					{this.props.task}
+				</div>
+				<p className="card-text">
+					{this.props.description}				
+				</p>
+			</article>
+		);
+	}
+}
+
+class App extends React.Component {
+	constructor () {
+		super();
+		this.state = {
+			todos: []
+		};
+	}
+
+	_getTodos() {
+		return this.state.todos.map((todo) => {
+			return (
+				<Todo key={todo.id} task={todo.task} description={todo.description} />
+			);
+		})
+	}
+
+	_addTodo (task, description) {
+		const todo = {
+			id: this.state.todos.length + 1,
+			task,
+			description
+		};
+
+		this.setState({todos: this.state.todos.concat([todo])});
+	}
+
+	render() {
+		return (
+			<div className="row">
+				<TodoForm addTodo={this._addTodo.bind(this)} />
+				<TodosSection getTodos={this._getTodos.bind(this)} />
+			</div>
+		);
+	}
 }
 
 ReactDOM.render(
